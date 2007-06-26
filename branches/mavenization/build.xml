@@ -77,7 +77,7 @@
                 <include name="**/*TokenTypes.txt"/>
             </fileset>
             <zipfileset src="lib/build/antlr-2.7.7.jar"/>
-            <rule pattern="antlr.**" result="org.skife.jdbi.antlr.@1" />
+            <rule pattern="antlr.**" result="org.skife.jdbi.antlr.@1"/>
 
             <zap pattern="antlr.Tool"/>
             <zap pattern="antlr.*Tool*"/>
@@ -124,6 +124,18 @@
         <echo message="built library: build/jdbi-${version}.jar"/>
     </target>
 
+
+    <target name="maven" depends="jar">
+        <jar jarfile="build/jdbi-${version}-bundle.jar">
+            <fileset dir="build/">
+                <include name="jdbi-${version}.jar"/>
+            </fileset>
+            <fileset dir="src/maven">
+                <include name="pom.xml"/>
+            </fileset>
+        </jar>
+    </target>
+
     <target name="clean" description="Remove All Artifacts">
         <delete quiet="true" dir="build"/>
         <delete quiet="true" dir="report"/>
@@ -167,7 +179,7 @@
 
         <copy todir="build/site/">
             <fileset dir="src/doc">
-                <exclude name="**/*.svn" />
+                <exclude name="**/*.svn"/>
             </fileset>
 
             <filterset>
