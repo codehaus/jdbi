@@ -1,1 +1,0 @@
-insert into something(id, name) values (:id, :name)
