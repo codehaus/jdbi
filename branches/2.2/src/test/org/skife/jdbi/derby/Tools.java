@@ -15,16 +15,19 @@
  */
 package org.skife.jdbi.derby;
 
-import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.skife.jdbi.HandyMapThing;
-
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import javax.sql.DataSource;
+
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.impl.jdbc.EmbedSQLException;
+import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.skife.jdbi.HandyMapThing;
 
 public class Tools
 {
@@ -51,35 +54,66 @@ public class Tools
         }
     }
 
-    public static void stop() throws SQLException
+    public static void stop() throws Exception
     {
         final Connection conn = getConnection();
-        final Statement delete = conn.createStatement();
-        try
-        {
-            delete.execute("delete from something");
-        }
-        catch (SQLException e)
-        {
-            // may not exist
-        }
-        delete.close();
-        final String[] drops = {"drop table something",
-                                "drop function do_it",
-                                "drop procedure INSERTSOMETHING"};
-        for (String drop : drops)
-        {
-            final Statement stmt = conn.createStatement();
-            try
-            {
-                stmt.execute(drop);
-            }
-            catch (Exception e)
-            {
-                // may not exist
-            }
 
-        }
+        deleteData(conn);
+        dropTables(conn);
+    }
+
+    private static void dropTables(final Connection conn) throws Exception {
+    	final String[] drops = {
+    			"drop table something",
+    			"drop table foo",
+    			"drop function do_it",
+    			"drop procedure INSERTSOMETHING"
+    	};
+
+    	for (String drop : drops)
+    	{
+    		final Statement stmt = conn.createStatement();
+    		try {
+    			stmt.execute(drop);
+    		} catch (Exception se)
+    		{
+    			if (se instanceof EmbedSQLException) {
+    				final String msg = ((EmbedSQLException) se).getMessageId();
+    				if (!msg.contains("42Y55")) {
+    					throw se;
+    				}
+    			} else {
+    				throw se;
+    			}
+    		}
+    		stmt.close();
+    	}
+    }
+
+    private static void deleteData(final Connection conn) throws Exception {
+    	final String [] deletes = {
+    			"delete from something",
+    			"delete from foo"
+    	};
+
+    	for(String delete : deletes)
+    	{
+    		final Statement stmt = conn.createStatement();
+		try {
+    		stmt.execute(delete);
+		} catch (Exception se)
+		{
+			if (se instanceof EmbedSQLException) {
+				final String msg = ((EmbedSQLException) se).getMessageId();
+				if (!msg.contains("42X05")) {
+					throw se;
+				}
+			} else {
+				throw se;
+			}
+		}
+    		stmt.close();
+    	}
     }
 
     public static Connection getConnection() throws SQLException
@@ -91,18 +125,21 @@ public class Tools
     {
         final Connection conn = getConnection();
 
-        final Statement create = conn.createStatement();
-        try
-        {
-            create.execute("create table something ( id integer, name varchar(50), integerValue integer, intValue integer )");
-        }
-        catch (Exception e)
-        {
-            // probably still exists because of previous failed test, just delete then
-            create.execute("delete from something");
-        }
-        create.close();
+        createTables(conn);
         conn.close();
+    }
+
+    private static void createTables(final Connection conn) throws SQLException {
+    	final String[] creates = {
+    			"create table something ( id integer, name varchar(50), integerValue integer, intValue integer )",
+    			"create table foo ( bar VARCHAR(20), baz VARCHAR(20), blo INTEGER )",
+    	};
+    	for (String create : creates)
+    	{
+    		final Statement stmt = conn.createStatement();
+    		stmt.execute(create);
+    		stmt.close();
+    	}
     }
 
     public static String doIt()
