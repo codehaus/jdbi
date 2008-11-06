@@ -1,7 +1,7 @@
 <project name="jDBI" default="jar" basedir=".">
 
     <property name="debug" value="true"/>
-    <property name="version" value="2.2.3"/>
+    <property name="version" value="2.2.4-dev"/>
 
     <target name="grammar" description="Build format grammer">
         <mkdir dir="build/grammar/org/skife/jdbi/rewriter/printf/"/>
@@ -68,10 +68,10 @@
         <mkdir dir="build"/>
 
         <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="lib/build/jarjar-0.7.jar"/>
-        <jarjar jarfile="build/jarjar.jar">
+        <jarjar jarfile="build/jdbi-${version}.jar">
             <fileset dir="build/classes">
                 <include name="**/*.class"/>
-                <exclude name="**/stringtemplate/**/*.class"/>
+
             </fileset>
             <fileset dir="build/grammar">
                 <include name="**/*TokenTypes.txt"/>
@@ -114,13 +114,6 @@
             <zap pattern="antlr.preprocessor.**"/>
         </jarjar>
 
-        <jar jarfile="build/jdbi-${version}.jar">
-            <zipfileset src="build/jarjar.jar"/>
-            <fileset dir="build/classes">
-                <include name="**/stringtemplate/**/*.class"/>
-            </fileset>
-        </jar>
-        <delete file="build/jarjar.jar"/>
         <echo message="built library: build/jdbi-${version}.jar"/>
     </target>
 
