@@ -119,11 +119,10 @@
 
     <target name="clean" description="Remove All Artifacts">
         <delete quiet="true" dir="build"/>
-        <delete quiet="true" dir="report"/>
     </target>
 
     <target name="test" depends="jar, compile-tests" description="Run all junit tests">
-        <mkdir dir="report"/>
+        <mkdir dir="build/report"/>
         <junit>
             <formatter type="plain"/>
             <classpath>
@@ -133,7 +132,7 @@
                 <pathelement location="build/jdbi-${version}.jar"/>
                 <pathelement location="build/jdbi-tests.jar"/>
             </classpath>
-            <batchtest todir="report" fork="true">
+            <batchtest todir="build/report" fork="true">
                 <fileset dir="src/test">
                     <include name="**/Test*.java"/>
                 </fileset>
