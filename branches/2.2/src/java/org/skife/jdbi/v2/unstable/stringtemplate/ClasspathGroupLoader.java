@@ -131,7 +131,7 @@ public class ClasspathGroupLoader implements StringTemplateGroupLoader
     private BufferedReader locate(String name)
     {
         for (String dir : dirs) {
-            final String fileName = dir + "/" + name;
+            final String fileName = buildFilename(dir, name);
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             InputStream stream = loader.getResourceAsStream(fileName);
             if (stream == null) {
@@ -143,6 +143,24 @@ public class ClasspathGroupLoader implements StringTemplateGroupLoader
             }
         }
         return null;
+    }
+
+    String buildFilename(final String dir, final String name) {
+    	String path = name;
+    	if (dir != null && !("".equals(dir))) {
+			if (dir.charAt(dir.length() - 1) == '/') {
+				path =  dir + name;
+			} else {
+				path =  dir + "/" + name;
+			}
+    	}
+    	if (path == null || "".equals(path)) {
+    		return "";
+    	} else if (path.charAt(0) == '/') {
+    		return path.substring(1);
+    	} else {
+    		return path;
+    	}
     }
 
     /**
