@@ -1,0 +1,7 @@
+target
+report
+*.iml
+.clover
+.idea
+build
+out
